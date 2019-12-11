@@ -1,0 +1,111 @@
+{%load static%}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+      <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="shortcut icon" type="image/jpg" href="{% static 'icons/gp2.png' %}">
+        <link href="https://fonts.googleapis.com/css?family=Francois+One&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Poppins&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Turret+Road&display=swap" rel="stylesheet">
+
+    <!--<meta name="display" content="KJCOEMR GATE PASS"> -->
+
+    <title>Blog Page</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/blog.css' %}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+            <a href="index"><h1>KJCOEMR GATE PASS</h1></a>
+            </div>
+            <nav>
+                <ul>
+                    {%if user.is_authenticated %}
+									
+                    <li><a href="hod_home">Hello {{user.first_name}}</a></li>
+                    <li><a href="forget_pass1">ChangePassowrd</a></li>
+                    <li><a href="#">Profile</a></li>
+                    <li><a href="logout">LOGOUT</a></li>
+                        {% else %}
+                        <li><a href="#">HOME</a></li>
+                        <li><a href="about_us">ABOUT</a></li>
+                        <li><a href="#">CONTACT</a></li>
+                        {%endif%}
+                </ul>
+            </nav>      
+        </div>
+    </header>
+  
+    </section>
+
+    {%if data|length %}
+     <section id="request">
+            <div class="stu">
+                    <div class="container" id="info">
+                        <h1>Gate Pass Applications</h1>
+                    </div>
+                </div>
+                {% for dat in data %}
+        <div class="container">
+                
+                
+            <section id="box" style="margin-bottom: 80px;">
+            <div class="time">
+                <!-- <h2>|| 09:00 pm</h2> -->
+            </div>
+            <div class="date">
+
+                <h2>Apply Date : {{dat.5}}</h2>
+            </div>
+ 
+            <div class="img">
+                    <div class="personel-info">
+                        <img src="http://127.0.0.1:8000/media/{{dat.6}}">
+                        <h3>Name : {{dat.0}}</h3>
+                        <h3>Email : {{dat.1}}</h3>
+                        <h3>Request Type : {{dat.2}}</h3>
+                        <h3>Mobile No : {{dat.3}}</h3>
+                    </div>
+            </div>
+            <div class="rea">
+                <h2>REASON</h2>
+            <p>{{dat.4}}</p>
+            </div>
+            <form action="" method="post">{%csrf_token%}
+                        <label>
+                            <input type="radio" name="verify" value="accept">
+                            <span class="accept">ACCEPT</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="verify" value="reject">
+                            <span class="reject">REJECT</span>
+                        </label>
+                    <button type="submit" name="Submit" value="{{dat.0}}">Confirm</button>
+                    </form>
+
+                    
+                   
+                   
+                    
+                    
+                      
+                   
+        </section>
+                </div>
+                {%endfor%}
+  </section>
+  {%else%}
+        <section>
+                <table>
+                        <tr> 
+                         <td id="hd" colspan="1" bgcolor="lightblue"><h1>Currently no request for gate pass</h1></td>
+                       </tr> 
+                       </table>
+        </section>  
+        {%endif%}
+</body>
+</html>

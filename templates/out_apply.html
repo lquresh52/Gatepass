@@ -1,0 +1,92 @@
+{%load static%}
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<link rel="shortcut icon" type="image/jpg" href="{% static 'icons/gp2.png' %}">
+	
+	<title>Apply</title>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/apply.css' %}">
+	<link href="https://fonts.googleapis.com/css?family=Poppins&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Francois+One&display=swap" rel="stylesheet">
+		<link rel="shortcut icon" type="image/jpg" href="{% static 'gp2.png' %}">
+
+</head>
+<body>
+	<header>
+		<div class="container">
+			<div id="branding">
+			<a href="#"><h1>KJCOEMR GATE PASS</h1></a>
+			</div>
+			<nav>
+				<ul>
+				{%if user.is_authenticated %}
+									
+                    <li><a href="stu_home">Hello {{user.first_name}}</a></li>
+                    <li><a href="forget_pass1">ChangePassowrd</a></li>
+                    <!-- <li><a href="#">Profile</a></li> -->
+                    <li><a href="logout">LOGOUT</a></li>
+                        {% else %}
+                        <li><a href="#">HOME</a></li>
+                        <li><a href="about_us">ABOUT</a></li>
+                        <li><a href="#">CONTACT</a></li>
+                        {%endif%}
+					</ul>
+					</li>
+				
+			</nav>
+			
+		</div>
+	</header>
+	
+	<section id="greet">
+		<div class="container">
+			<h1>Welcome {{user.first_name}} {{user.last_name}}</h1>
+	        <h2>Apply for OUT Gate Pass</h2>
+		</div>
+
+			<div>
+					{%block content%}
+					{%for  message in messages %}
+					<h3 style="color:red;">{{message}}</h3>
+					{%endfor%}
+					{%endblock%}
+			</div>
+
+	</section> 
+<form action="" method="post">{%csrf_token%}
+	<section id="check">
+		<div class="container">
+	<label class="radiocontainer">Medical
+	  <input type="radio" checked="checked" name="radio" value="medical">
+	  	<span class="checkmark"></span>
+	</label>
+	<label class="radiocontainer">Religious
+	  <input type="radio" name="radio" value="religious">
+	  	<span class="checkmark"></span>
+	</label>
+	<label class="radiocontainer">Others
+	  <input type="radio" name="radio" value="others">
+	 	 <span class="checkmark"></span>
+	</label>
+</div>
+</section>
+	<section id="get">
+		<div class="container">
+			
+			
+			 <textarea  class="type1" placeholder="Type your reason..." name="reason_des"></textarea>
+			<br><br>
+			 <input class="click" type="submit" name="" value="Apply">
+		
+		
+		
+		</div>
+	</section>
+</form>
+	<footer>
+<p>KJCOEMR GATE PASS,Copyright &copy;2019</p>
+</footer>
+</body>
+</html>

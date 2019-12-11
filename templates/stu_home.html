@@ -1,0 +1,100 @@
+{%load static%}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+        <link rel="shortcut icon" type="image/jpg" href="{% static 'icons/gp2.png' %}">
+
+    <!--<meta name="display" content="KJCOEMR GATE PASS"> -->
+
+    <title>Student</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/student.css' %}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+            <a href="#"><h1>KJCOEMR GATE PASS</h1></a>
+            </div>
+            <nav>
+                <ul>
+                    {%if user.is_authenticated %}
+									
+                    <li><a href="stu_home">Hello {{user.first_name}}</a></li>
+                    <li><a href="forget_pass1">ChangePassowrd</a></li>
+                    <!-- <li><a href="#">Profile</a></li> -->
+                    <li><a href="logout">LOGOUT</a></li>
+                        {% else %}
+                        <li><a href="#">HOME</a></li>
+                        <li><a href="about_us">ABOUT</a></li>
+                        <li><a href="#">CONTACT</a></li>
+                        {%endif%}
+                </ul>
+            </nav>      
+        </div>
+    </header>
+    <section id="btns">
+        <div class="container">
+            <div style="text-align: center;">
+                        <h2 class="clk">Select Your Type for Gate Pass </h2>
+        <a href="in_apply"><button type="submit" name="Submit" value="in">IN</button></a>
+        <a href="out_apply"> <button type="submit" name="Submit" value="out">OUT</button></a>
+        <!-- <a href="inout_apply"> <button type="submit" name="Submit" value="in_out">IN-OUT</button></a> -->
+        </div>
+        </div>
+    </section>
+    
+
+
+
+<section id="req">
+    <div class="container">
+        <div style="overflow-x: auto;">
+            {%if data|length %}
+        <table>
+            
+            <tr>
+                <td id="hd" colspan="5" bgcolor="lightgreen"><h1>Application Status</h1></td>
+            </tr>
+            <tr>
+                    <th>Sr no.</th>
+                    <th>Time</th>
+                    <th>Name</th>
+                    <th>Your Reason</th>
+                    <th>Status</th>
+             </tr> 
+             {% for dat in data %}
+             <tr>
+                    <td>{{dat.0}}</td>
+                    <td>{{dat.1}}</td>
+                    <td>{{dat.2}}</td>
+                    <td>{{dat.3}}</td>
+                    <td id="status">{{dat.4}}</td> 
+             </tr>
+             {%endfor%}
+        </table>
+        {%else%}
+            <table>
+              <tr> 
+               <td id="hd" colspan="5" bgcolor="lightblue"><h1>You haven't applied for Gate Pass</h1></td>
+             </tr> 
+             </table>
+              
+        {%endif%}                  
+    </div>
+    </div>
+</section>
+
+
+
+
+
+
+
+    
+<!--<footer>
+<p>KJCOEMR GATE PASS,Copyright &copy;2019</p>
+</footer>-->
+</body>
+</html>

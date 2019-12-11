@@ -1,0 +1,97 @@
+{%load static%}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="shortcut icon" type="image/jpg" href="{% static 'icons/gp2.png' %}">
+
+    <!--<meta name="display" content="KJCOEMR GATE PASS"> -->
+
+    <title>GFM Page</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/gfm.css' %}">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div id="branding">
+            <a href="index"><h1>KJCOEMR GATE PASS</h1></a>
+            </div>
+            <nav>
+                <ul>
+                        {%if user.is_authenticated %}
+									
+                    <li><a href="gfm_home">Hello {{user.first_name}}</a></li>
+                    <!-- <li><a href="forget_pass1">ChangePassowrd</a></li> -->
+                    <!-- <li><a href="#">Profile</a></li> -->
+                    <li><a href="logout">LOGOUT</a></li>
+                        {% else %}
+                        <li><a href="#">HOME</a></li>
+                        <li><a href="about_us">ABOUT</a></li>
+                        <li><a href="#">CONTACT</a></li>
+                        {%endif%}
+                </ul>
+            </nav>      
+        </div>
+    </header>
+    
+    <section id="stu">
+        <div class="container">
+            <div style="overflow-x: auto;">
+                    {%if data|length %}
+                    <section id="hd">
+                            <div class="container">
+                                    <h1>Student Verification</h1>
+                                </div>
+                    </section>
+
+            <table>
+                <tr>
+                    <th>Sr.no</th>
+                    <th>Name</th>
+                    <th>Mobile Number</th>
+                    <th>Class</th>
+                    <th>Roll no</th>
+                    <th>GFM Name</th>
+                    <th>Approve</th>
+                </tr>
+                {%for i in data%}
+                <tr>
+                    <td>{{i.0}}</td>
+                    <td>{{i.1}}</td>
+                    <td>{{i.2}}</td>
+                    <td>{{i.3}}</td>
+                    <td>{{i.4}}</td>
+                    <td>Prof. Bogiri</td>
+                    <td>
+                        <form action="" method="post">{% csrf_token %}
+                        <label>
+                            <input type="radio" name="verify" value="accept">
+                            <span class="accept">ACCEPT</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="verify" value="reject">
+                            <span class="reject">REJECT</span>
+                        </label>
+                    <button type="submit" name="Submit" value="{{i.1}}">Confirm</button>
+                    </form></td>
+                </tr>
+                {%endfor%}
+            </table>
+            {% else %}
+            <table>
+                    <tr> 
+                     <td id="hd" colspan="5" bgcolor="lightblue"><h1>No Student Request Pending</h1></td>
+                   </tr> 
+                   </table>
+                    
+              {%endif%}    
+
+        </div>
+        </div>
+    </section>
+<!--<footer>
+<p>KJCOEMR GATE PASS,Copyright &copy;2019</p>
+</footer>-->
+</body>
+</html>
