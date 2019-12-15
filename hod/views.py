@@ -6,6 +6,7 @@ from . models import hod_data
 from student.models import stu_signup
 import psycopg2
 import datetime
+from datetime import date
 import os
 numalpha='abcdefghijklmnopqrstuvwxyz0123456789'
 key=5
@@ -107,19 +108,24 @@ def hod_accept(request):
         print(gen)
         
         date=str(datetime.datetime.now())
+        today_date = str(datetime.date.today())
+        print(date)
+        print(today_date)
+        # ,req_accept_time='"+date+"'
         if per is not None:
             if gen == 'accept':
-                cur.execute("update student_in_req set status='accepted' where username='"+per+"'")
-                cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")
+                cur.execute("update student_in_req set status='accepted' where username='"+per+"' and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
+                # cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")  
                 con.commit()
             else:
-                cur.execute("update student_in_req set status='rejected' where username='"+per+"'")
+                cur.execute("update student_in_req set status='rejected' where username='"+per+"'and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
                 cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")
                 con.commit()
         con.close()
         return redirect('hod_accept')
         # return render(request,'hod_accept.html')
     else:
+        print('Retriving records/data')
         con=psycopg2.connect(
             host="localhost",
             database="gatepass",

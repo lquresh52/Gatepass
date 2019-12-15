@@ -102,7 +102,7 @@ def security_in(request):
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
         if per is not None:
-            cur.execute("update student_in_req set in_time = '"+ dt_string +"',status='IN' where username='"+per+"'")
+            cur.execute("update student_in_req set in_time = '"+ dt_string +"',status='IN' where username='"+per+"' and status='accepted' and request_type='IN Request'")
             con.commit()
         con.close()
 
@@ -222,7 +222,7 @@ def security_out(request):
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
         if per is not None:
-            cur.execute("update student_in_req set out_time = '"+ dt_string +"',status='OUT' where username='"+per+"'")
+            cur.execute("update student_in_req set out_time = '"+ dt_string +"',status='OUT' where username='"+per+"' and status='accepted' and request_type='Out Request'")
             con.commit()
         con.close()
 
@@ -233,15 +233,16 @@ def security_out(request):
             database="gatepass",
             user="postgres",
             password="123456")
-        print('In student home')
+        print('In security out pg')
         username=request.user.username
         print(username)
         cur=con.cursor()
-        cur.execute("select username,req_accept_time,status from student_in_req where status='accepted' and request_type='OUT Request'")
+        cur.execute("select username,req_accept_time,status from student_in_req where status='accepted' and request_type='Out Request'")
         rows=cur.fetchall()
         
         # for generating  id number e.g 1,2,3,4 depend on rows
         new_row = list(rows)
+        print(rows)
         for i in range (0, len(rows)):
             new_row[i] = (i+1,) + new_row[i]
 

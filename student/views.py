@@ -351,6 +351,7 @@ def in_apply(request):
 
                 user=in_req(apply_time=datetime.datetime.now(), reason=reason, reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='IN Request' , in_req_count=count+1 , req_date=today )
                 user.save()
+                print('data saved in table')
 
 
 
@@ -366,8 +367,9 @@ def in_apply(request):
             to_list = ['lquresh52@gmail.com']
 
             send_mail(subject , message , from_email , to_list , fail_silently=True)
-            user=in_req(apply_time=datetime.datetime.now(), reason=reason, reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='IN Request' , in_req_count=count+1 , req_date=today )
+            user=in_req(apply_time=str(datetime.datetime.now()), reason=reason, reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='IN Request' , in_req_count=count+1 , req_date=today )
             user.save()
+            print('data saved in table')
 
             # return render(request,'stu_home.html')
             return redirect('stu_home')
@@ -403,6 +405,7 @@ def out_apply(request):
         rows=cur.fetchall()
         email=''
         mobile_no=''
+        print(rows)
         if not rows==[]:
             for r in rows:
                 email=r[1]
@@ -417,7 +420,7 @@ def out_apply(request):
             for r in row:
                 count=int(r[1])
                 req_date=r[2]
-        
+        print(req_date)
         if today==req_date:
             print('//////////////////')
             if not count==1:
@@ -443,7 +446,7 @@ def out_apply(request):
             to_list = ['lquresh52@gmail.com']
 
             send_mail(subject , message , from_email , to_list , fail_silently=True)
-            user=in_req(apply_time=datetime.datetime.now(), reason=reason, reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='Out Request' , out_req_count=count+1 , req_date=today )
+            user=in_req(apply_time=str(datetime.datetime.now()), reason=reason, reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='Out Request' , out_req_count=count+1 , req_date=today )
             user.save()
             # return render(request,'stu_home.html')
             return redirect('stu_home')
