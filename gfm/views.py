@@ -206,15 +206,19 @@ def gfm_grant_permission(request):
         print(per)
         print(gen)
 
-        now=datetime.datetime.now()
-        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+        date=str(datetime.datetime.now())
+        today_date = str(datetime.date.today())
+        print(date)
+        print(today_date)
 
         if per is not None:
             if gen == 'accept':
-                cur.execute("update student_in_req set status='accepted',req_accept_time = '"+ dt_string +"' where username='"+per+"'")
+                # cur.execute("update student_in_req set status='accepted',req_accept_time = '"+ dt_string +"' where username='"+per+"'")
+                cur.execute("update student_in_req set status='accepted',req_accept_time='"+date+"' where username='"+per+"'and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
                 con.commit()
             else:
-                cur.execute("update student_in_req set status='rejected',req_accept_time='"+dt_string+"' where username='"+per+"'")
+                # cur.execute("update student_in_req set status='rejected',req_accept_time='"+dt_string+"' where username='"+per+"'")
+                cur.execute("update student_in_req set status='rejected',req_accept_time='"+date+"' where username='"+per+"'and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
                 con.commit()
         con.close()
         return redirect('gfm_grant_permission')

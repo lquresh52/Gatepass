@@ -71,20 +71,10 @@ def hod_login(request):
         
         return render(request,'hod_login.html')
         
-        # user=hod_data(username=username,password=password)
-        # user.save()
-        # user1= User.objects.create_user(username=username,password=password)
-        # user1.save()
-        # print('hod data saved')
-        # return render(request,'hod_login.html')
     else:
-        # user=security_data(username=username,password=password)
-        # user.save()
-        # user1= User.objects.create_user(username=username,password=password)
-        # user1.save()
         return render(request,'hod_login.html')
 
-    # return render(request,'hod_login.html')
+    
 
 
 
@@ -114,12 +104,12 @@ def hod_accept(request):
         # ,req_accept_time='"+date+"'
         if per is not None:
             if gen == 'accept':
-                cur.execute("update student_in_req set status='accepted' where username='"+per+"' and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
+                cur.execute("update student_in_req set status='accepted',req_accept_time='"+date+"' where username='"+per+"' and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
                 # cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")  
                 con.commit()
             else:
-                cur.execute("update student_in_req set status='rejected' where username='"+per+"'and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
-                cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")
+                cur.execute("update student_in_req set status='rejected',req_accept_time='"+date+"' where username='"+per+"'and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
+                # cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")
                 con.commit()
         con.close()
         return redirect('hod_accept')
@@ -261,7 +251,7 @@ def stu_report(request):
 #************************************************************************************************************************************
 
 
-def forget_pass1(request):
+def forget_pass1h(request):
     if request.method == 'POST':
         email=request.POST.get("email")
         mobile_no=request.POST.get("mobile_no")
@@ -281,7 +271,7 @@ def forget_pass1(request):
         if not rows ==[]:
             for r in rows:
                     if email == r[0] and int(mobile_no)==r[1]:
-                        return redirect('forget_pass2')
+                        return redirect('forget_pass2h')
                     else:
                         messages.info(request,'Email id and mobile number did not match!!!!!!!!')
                         return render(request,'forget_pass1.html')
@@ -297,7 +287,7 @@ def forget_pass1(request):
 
 
 
-def forget_pass2(request):
+def forget_pass2h(request):
     print('lol')
     if request.method == 'POST':
         email=request.POST.get("email")
@@ -337,7 +327,7 @@ def forget_pass2(request):
             return redirect('hod_home')
         else:
             messages.info(request,'password and confirm password did not match')
-            return redirect('forget_pass2')
+            return redirect('forget_pass2h')
     else:
         return render(request,'forget_pass2.html')    
 #************************************************************************************************************************************

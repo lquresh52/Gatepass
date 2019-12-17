@@ -177,7 +177,7 @@ def signup_form(request):
 #************************************************************************************************************************************
 
 
-def forget_pass1(request):
+def forget_pass11(request):
     if request.method == 'POST':
         email=request.POST.get("email")
         mobile_no=request.POST.get("mobile_no")
@@ -198,7 +198,7 @@ def forget_pass1(request):
                 if not r[2]=='rejected':
                     print(r[1])
                     if email == r[0] and int(mobile_no)==r[1]:
-                        return redirect('forget_pass2')
+                        return redirect('forget_pass22')
                     else:
                         messages.info(request,'Email id and mobile number did not match!!!!!!!! ')
                         return render(request,'forget_pass1.html')
@@ -217,7 +217,7 @@ def forget_pass1(request):
 
 
 
-def forget_pass2(request):
+def forget_pass22(request):
     print('lol')
     if request.method == 'POST':
         email=request.POST.get("email")
@@ -256,7 +256,7 @@ def forget_pass2(request):
             return redirect('student_login')
         else:
             messages.info(request,'password and confirm password did not match')
-            return redirect('forget_pass2')
+            return redirect('forget_pass22')
     else:
         return render(request,'forget_pass2.html')
     
