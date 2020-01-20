@@ -45,16 +45,23 @@
 					{%endblock%}
 			</div>
 
-	<div class="container">
+	<!-- <div class="container">
 		<i class="fa fa-user"></i>
+		<div class="srch">
+			<input type="search" id="searchBox" placeholder="Search GFM name">
+		</div>
 		<select required="" id="w" name="gfm">
 			<option value="">-- Select --</option >
-			 <option value="Prof. S.Shinde">Prof. S.Shinde</option>
+			 <option value="Prof.S.Shinde">Prof. S.Shinde</option>
 			 <option value="Prof. V.B Maral">Prof. V.B Maral</option >
- 			 <option value="Prof. Bogiri">Prof. Bogiri</option>
-  			<option value="Prof. S.L.Yedage">Prof. S.L.Yedage</option>
-  			<option value="Prof.M Kharche">Prof.M Kharche</option>
+ 			 <option value="Prof.N.Bogiri">Prof.N.Bogiri</option>
+  			<option value="Prof.S.L.Yedage">Prof. S.L.Yedage</option>
+  			<option value="Prof.M.Kharche">Prof.M Kharche</option>
 		</select>
+	</div> -->
+	<div class="container">
+		<i class="fa fa-user"></i>
+		<input type="text" placeholder="Email Id" name="username">
 	</div>
 	<div class="container">
 		<i class="fa fa-lock"></i>
@@ -81,5 +88,35 @@
 <!--<footer>
 <p>KJCOEMR GATE PASS,Copyright &copy;2019</p>
 </footer>-->
+
+<script>
+    searchBox = document.querySelector("#searchBox");
+countries = document.querySelector("#w");
+var when = "keyup"; //You can change this to keydown, keypress or change
+
+searchBox.addEventListener("keyup", function (e) {
+    var text = e.target.value; 
+    var options = countries.options; 
+    for (var i = 0; i < options.length; i++) {
+        var option = options[i]; 
+        var optionText = option.text; 
+        var lowerOptionText = optionText.toLowerCase();
+        var lowerText = text.toLowerCase(); 
+        var regex = new RegExp("^" + text, "i");
+        var match = optionText.match(regex); 
+        var contains = lowerOptionText.indexOf(lowerText) != -1;
+        if (match || contains) {
+            option.selected = true;
+            return;
+        }
+        searchBox.selectedIndex = 0;
+    }
+});
+</script>
+
+
+
+
+
 </body>
 </html>

@@ -58,7 +58,7 @@ def security_login(request):
                         print(user)
                         if user is not None:
                             auth.login(request, user)
-                            return redirect("security_home")
+                            return redirect("security_in")
                         else:
                             return redirect("security_login")
                     else:         
@@ -70,7 +70,7 @@ def security_login(request):
         else:
             return render(request,'security_login.html')
         
-        return render(request,'security_home.html')
+        return render(request,'security_in.html')
     else:
         # user=security_data(username=username,password=password)
         # user.save()
@@ -102,7 +102,7 @@ def security_in(request):
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
         if per is not None:
-            cur.execute("update student_in_req set in_time = '"+ dt_string +"',status='IN' where username='"+per+"' and status='accepted' and request_type='IN Request'")
+            cur.execute("update student_in_req set in_time = '"+ dt_string +"',status='IN' where username='"+per+"' and (status='accepted' or status='hod_accepted') and request_type='IN Request'")
             con.commit()
         con.close()
 
@@ -116,8 +116,9 @@ def security_in(request):
         print('In student home')
         username=request.user.username
         print(username)
+        today_date = str(datetime.date.today())
         cur=con.cursor()
-        cur.execute("select username , req_accept_time , status from student_in_req where status='accepted' and request_type='IN Request'")
+        cur.execute(f"select username , req_accept_time , status from student_in_req where (status='accepted' or status='rejected' or status='gfm_rejected' or status='hod_rejected' or status='hod_accepted') and request_type='IN Request' and req_date='{today_date}'")
         rows=cur.fetchall()
         
         # for generating  id number e.g 1,2,3,4 depend on rows
@@ -134,70 +135,13 @@ def security_in(request):
             new_row[i] = new_row[i] + (stu_signup.objects.get(username=new_row[i][1]).icard_img, )
 
         if rows is not None:
-            print(new_row) 
+            # print(new_row) 
             con.close()
-            return render(request,'security_in.html',{'data':new_row})
+            return render(request,'security_in.html',{'data':new_row,})
         else:
             # return redirect('apply')
             return render(request,'security_in.html')
 
-
-
-
-
-
-
-
-
-    # if request.method=='POST':
-    #     con=psycopg2.connect(
-    #         host="localhost",
-    #         database="gatepass",
-    #         user="postgres",
-    #         password="123456")
-
-    #     cur=con.cursor()
-    #     # gen=request.POST.get('verify')
-    #     per=request.POST.get('Submit')
-    #     print("HEllo")
-    #     print(per)
-
-    #     now=datetime.datetime.now()
-    #     dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-
-    #     if per is not None:
-    #         cur.execute("update student_in_req set in_time = '"+ dt_string +"',status='IN' where username='"+per+"'")
-    #         con.commit()
-    #     con.close()
-
-    #     return redirect('security_in')
-    # else:
-    #     con=psycopg2.connect(
-    #         host="localhost",
-    #         database="gatepass",
-    #         user="postgres",
-    #         password="123456")
-    #     print('In student home')
-    #     username=request.user.username
-    #     print(username)
-    #     cur=con.cursor()
-    #     cur.execute("select username,mobile_no,req_accept_time,status from student_in_req where status='accepted'")
-    #     rows=cur.fetchall()
-        
-    #     # for generating  id number e.g 1,2,3,4 depend on rows
-    #     new_row = list(rows)
-    #     for i in range (0, len(rows)):
-    #         new_row[i] = (i+1,) + new_row[i]
-    #     if rows is not None:
-    #         print(rows) 
-    #         con.close()
-    #         return render(request,'security_in.html',{'data':new_row})
-    #     else:
-    #         # return redirect('apply')
-    #         return render(request,'security_in.html')
-    #     # print(new_row)
-    #     # return render(request,'security_in.html',{'data':new_row})
-    #     # return render(request,'security_in.html')
 
 #************************************************************************************************************************************
 
@@ -222,7 +166,7 @@ def security_out(request):
         dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
         if per is not None:
-            cur.execute("update student_in_req set out_time = '"+ dt_string +"',status='OUT' where username='"+per+"' and status='accepted' and request_type='Out Request'")
+            cur.execute("update student_in_req set out_time = '"+ dt_string +"',status='OUT' where username='"+per+"' and (status='accepted' or status='hod_accepted') and request_type='Out Request'")
             con.commit()
         con.close()
 
@@ -237,7 +181,8 @@ def security_out(request):
         username=request.user.username
         print(username)
         cur=con.cursor()
-        cur.execute("select username,req_accept_time,status from student_in_req where status='accepted' and request_type='Out Request'")
+        today_date = str(datetime.date.today())
+        cur.execute(f"select username,req_accept_time,status from student_in_req where (status='accepted' or status='rejected' or status='gfm_rejected' or status='hod_rejected' or status='hod_accepted') and request_type='Out Request' and req_date='{today_date}'")
         rows=cur.fetchall()
         
         # for generating  id number e.g 1,2,3,4 depend on rows
@@ -255,7 +200,7 @@ def security_out(request):
             new_row[i] = new_row[i] + (stu_signup.objects.get(username=new_row[i][1]).icard_img, )
 
         if rows is not None:
-            print(new_row) 
+            # print(new_row) 
             con.close()
             return render(request,'security_out.html',{'data':new_row})
         else:
@@ -282,3 +227,101 @@ def security_home(request):
 def logout(request):
     auth.logout(request)
     return redirect('/')
+
+
+
+#************************************************************************************************************************************
+
+
+
+def test(request):
+    if request.method == 'POST':
+        return render(request,'test.html')
+    else:
+        con=psycopg2.connect(
+            host="localhost",
+            database="gatepass",
+            user="postgres",
+            password="123456")
+
+        cur=con.cursor()
+        cur.execute("SELECT COUNT(status) FROM student_in_req WHERE branch='computer' and year='BE' and status='IN'")
+        # cur.execute("select COUNT(status) from student_in_req WHERE (req_date BETWEEN '2019-12-12' AND '2019-12-15')")
+        rows=cur.fetchall()
+        l = []
+        print(rows)
+        for i in rows:
+            for a in i:
+                l.append(a)
+                
+        print(l)
+
+        cur=con.cursor()
+        cur.execute("SELECT COUNT(status) FROM student_in_req WHERE branch='computer' and year='BE' and status='OUT'")
+        rows=cur.fetchall()
+        print(rows)
+        for i in rows:
+            for a in i:
+                l.append(a)
+        print(l)   
+
+        
+        cur.execute("SELECT COUNT(status) FROM student_in_req WHERE branch='computer' and year='TE' and status='IN'")
+        rows=cur.fetchall()
+        print(rows)
+        for i in rows:
+            for a in i:
+                l.append(a)
+                
+        print(l)
+
+        cur=con.cursor()
+        cur.execute("SELECT COUNT(status) FROM student_in_req WHERE branch='computer' and year='TE' and status='OUT'")
+        rows=cur.fetchall()
+        print(rows)
+        for i in rows:
+            for a in i:
+                l.append(a)
+        print(l)   
+
+        cur.execute("SELECT COUNT(status) FROM student_in_req WHERE branch='computer' and year='SE' and status='IN'")
+       
+        rows=cur.fetchall()
+        print(rows)
+        for i in rows:
+            for a in i:
+                l.append(a)
+                
+        print(l)
+
+        cur=con.cursor()
+        cur.execute("SELECT COUNT(status) FROM student_in_req WHERE branch='computer' and year='SE' and status='OUT'")
+        rows=cur.fetchall()
+        print(rows)
+        for i in rows:
+            for a in i:
+                l.append(a)
+        print(l)   
+
+
+        cur.execute("SELECT COUNT(status) FROM student_in_req WHERE branch='computer' and year='FE' and status='IN'")
+       
+        rows=cur.fetchall()
+        print(rows)
+        for i in rows:
+            for a in i:
+                l.append(a)
+                
+        print(l)
+
+        cur=con.cursor()
+        cur.execute("SELECT COUNT(status) FROM student_in_req WHERE branch='computer' and year='FE' and status='OUT'")
+        rows=cur.fetchall()
+        print(rows)
+        for i in rows:
+            for a in i:
+                l.append(a)
+        print(l)   
+
+
+        return render(request,'test.html',{'data':l})

@@ -109,6 +109,9 @@ table,th,td{
 	border-collapse: collapse;
 
 }
+form{
+	padding-left: 20px;
+}
 th,td{
 	padding: 10px;
 }

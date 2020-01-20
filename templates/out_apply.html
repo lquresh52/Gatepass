@@ -2,91 +2,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/stu_in1.css' %}">
 	<link rel="shortcut icon" type="image/jpg" href="{% static 'icons/gp2.png' %}">
-	
-	<title>Apply</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/apply.css' %}">
-	<link href="https://fonts.googleapis.com/css?family=Poppins&display=swap" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css?family=Francois+One&display=swap" rel="stylesheet">
-		<link rel="shortcut icon" type="image/jpg" href="{% static 'gp2.png' %}">
 
+	<title>OUT Request</title>
+	<link href="https://fonts.googleapis.com/css?family=Poppins&display=swap" rel="stylesheet">
 </head>
 <body>
 	<header>
-		<div class="container">
-			<div id="branding">
-			<a href="#"><h1>KJCOEMR GATE PASS</h1></a>
-			</div>
+		<div id="mySidenav" class="sidenav">
+	  		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+	  		<a href="stu_home" >Student<br>Reports</a>
+	 		<a href="in_apply" >In<br>Request</a>
+	  		<a href="out_apply" id="sp-1">Out<br>Request</a>
+	  		<div class="thin-line"></div>
+			  {%if user.is_authenticated %}
+			  <a href="my_profile">Hello<br>{{user.first_name}}</a>
+			  <a href="logout">LogOut</a>
+			  {%else%}
+			  <a href="#">Hello<br>---</a>
+			  <a href="logout">LogOut</a>
+			  {%endif%}
+		</div>
+		<div class="top-nav-bar">					<!--------------TOP NAVIGATION BAR----------------->
+			<span class="top-nav-bar-burger"  onclick="openNav()">&#9776;</span>
+			<h1>KJCOEMR GATE PASS</h1>
 			<nav>
-				<ul>
-				{%if user.is_authenticated %}
-									
-                    <li><a href="stu_home">Hello {{user.first_name}}</a></li>
-                    <li><a href="forget_pass1">ChangePassowrd</a></li>
-                    <!-- <li><a href="#">Profile</a></li> -->
-                    <li><a href="logout">LOGOUT</a></li>
-                        {% else %}
-                        <li><a href="#">HOME</a></li>
-                        <li><a href="about_us">ABOUT</a></li>
-                        <li><a href="#">CONTACT</a></li>
-                        {%endif%}
-					</ul>
-					</li>
-				
+				<ul class="top-nav-bar-ul">
+					{%if user.is_authenticated %}
+					<li><a href="my_profile">Hello {{user.first_name}}</a></li>
+					<li><a href="logout">LOGOUT</a></li>
+					{%else%}
+                    <li><a href="#">Hello<br>---</a></li>
+                    <li><a href="logout">LogOut</a></li>
+                    {%endif%}
+				</ul>
 			</nav>
-			
+		</div>
+		<div class="side-nav-bar">					<!--------------SIDE NAVIGATION BAR----------------->
+			<li><a href="stu_home">Student<br>Reports</a></li>
+			<li ><a href="in_apply">In<br>Request</a></li>
+			<li id="stu-ani-2"><a href="out_apply">Out<br>Request</a>
 		</div>
 	</header>
-	
-	<section id="greet">
-		<div class="container">
-			<h1>Welcome {{user.first_name}} {{user.last_name}}</h1>
-	        <h2>Apply for OUT Gate Pass</h2>
-		</div>
-
-			<div>
-					{%block content%}
-					{%for  message in messages %}
-					<h3 style="color:red;">{{message}}</h3>
-					{%endfor%}
-					{%endblock%}
+	<section class="request-main">						<!---------------REQUEST LOGIC----------------------->
+		<h1 class="stu-apps-heading">OUT<br>REQUEST</h1>
+		
+			{%block content%}
+			{%for  message in messages %}
+			<div class="alert-warning">
+			<h3 style="color:red;">{{message}}</h3>
 			</div>
+			{%endfor%}
+			{%endblock%}  
+		
 
-	</section> 
-<form action="" method="post">{%csrf_token%}
-	<section id="check">
-		<div class="container">
-	<label class="radiocontainer">Medical
-	  <input type="radio" checked="checked" name="radio" value="medical">
-	  	<span class="checkmark"></span>
-	</label>
-	<label class="radiocontainer">Religious
-	  <input type="radio" name="radio" value="religious">
-	  	<span class="checkmark"></span>
-	</label>
-	<label class="radiocontainer">Others
-	  <input type="radio" name="radio" value="others">
-	 	 <span class="checkmark"></span>
-	</label>
-</div>
-</section>
-	<section id="get">
-		<div class="container">
-			
-			
-			 <textarea  class="type1" placeholder="Type your reason..." name="reason_des"></textarea>
-			<br><br>
-			 <input class="click" type="submit" name="" value="Apply">
-		
-		
-		
-		</div>
+		<form action="" method="post">{%csrf_token%}
+		<textarea  class="tex" placeholder="Type your reason..." name="reason_des"></textarea>
+		<br>
+		<input type="submit" name="Submit" class="btn" value="Apply">
+		</form>
 	</section>
-</form>
-	<footer>
-<p>KJCOEMR GATE PASS,Copyright &copy;2019</p>
-</footer>
+	<!----------------------------------------------------------- JAVASCRIPT ------------------------------>
+	<script>											
+		function openNav() {
+  			document.getElementById("mySidenav").style.width = "250px";
+		}
+
+		function closeNav() {
+  			document.getElementById("mySidenav").style.width = "0";
+		}
+	</script>
 </body>
 </html>

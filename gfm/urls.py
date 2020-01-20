@@ -13,6 +13,9 @@ urlpatterns = [
     path('gfm_rejected_stu',views.gfm_rejected_stu,name='gfm_rejected_stu'),
     path('forget_pass1',views.forget_pass1,name='forget_pass1'),
     path('forget_pass2',views.forget_pass,name='forget_pass'),
+    path('gfm_stu_report',views.gfm_stu_report,name='gfm_stu_report'),
+    path('gfm_stu_profile',views.gfm_stu_profile,name='gfm_stu_profile'),
+    path('edit_myprof',views.edit_myprof,name='edit_myprof'),
     path('logout',views.logout,name='logout'),
     
 ]

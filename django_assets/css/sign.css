@@ -13,12 +13,7 @@ body{
 	padding: 0;
 	transition: 0.6s ease;
 	background-color: white;
-		/*background-image:linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)), url(../books.jpeg);
-		height: 100%;
-		width: 100%;
-		background-size: cover;
-		background-repeat: no-repeat;
-*/
+
 
 }
 /*GLOBAL*/
@@ -140,8 +135,8 @@ form{
 	background-repeat: no-repeat;
 	background-size: cover;
 	background-color:white /*#ffcc00*/;
-	display: block;
-	/* flex-direction: row; */
+	display: flex;
+	flex-direction: row;
 
 	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.66),0 6px 20px 0 rgba(0,0,0,0.66);
 	margin-right: 25%;

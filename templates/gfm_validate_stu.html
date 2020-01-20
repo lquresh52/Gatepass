@@ -2,67 +2,89 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/tab.css' %}">
     <link rel="shortcut icon" type="image/jpg" href="{% static 'icons/gp2.png' %}">
-
-    <!--<meta name="display" content="KJCOEMR GATE PASS"> -->
-
-    <title>GFM Page</title>
-    <link rel="stylesheet" type="text/css" href="{% static 'css/gfm.css' %}">
+    <title>Validate Student</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <div class="container">
-            <div id="branding">
-            <a href="index"><h1>KJCOEMR GATE PASS</h1></a>
-            </div>
+        <div id="mySidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a href="gfm_grant_permission" >Student<br>Applications</a>
+            <a href="gfm_validate_stu" id="sp-1">Validate<br>Student</a>
+            <a href="gfm_rejected_stu" >Rejected Student <br>List</a>
+            <a href="gfm_stu_report">Student<br>Report</a>
+            <a href="gfm_stu_profile">Student<br>Profile</a>
+            <div class="thin-line"></div>
+            {%if user.is_authenticated %}
+            <a href="#">Hello<br>{{user.first_name}}</a>
+            <a href="logout">LogOut</a>
+            {%else%}
+            <a href="#">Hello<br>---</a>
+            <a href="logout">LogOut</a>
+            {%endif%}
+        </div>
+        <div class="top-nav-bar">                   <!--------------TOP NAVIGATION BAR----------------->
+            <span class="top-nav-bar-burger"  onclick="openNav()">&#9776;</span>
+            <h1>KJCOEMR GATE PASS</h1>
             <nav>
-                <ul>
-                        {%if user.is_authenticated %}
-									
-                    <li><a href="gfm_home">Hello {{user.first_name}}</a></li>
-                    <!-- <li><a href="forget_pass1">ChangePassowrd</a></li> -->
-                    <!-- <li><a href="#">Profile</a></li> -->
-                    <li><a href="logout">LOGOUT</a></li>
-                        {% else %}
-                        <li><a href="#">HOME</a></li>
-                        <li><a href="about_us">ABOUT</a></li>
-                        <li><a href="#">CONTACT</a></li>
-                        {%endif%}
+                <ul class="top-nav-bar-ul">
+                    {%if user.is_authenticated %}
+                    <li><a href="#">Hello {{user.first_name}}</a></li>
+                    <li><a href="logout">LogOut</a></li>
+                    {%else%}
+                    <li><a href="#">Hello<br>---</a></li>
+                    <li><a href="logout">LogOut</a></li>
+                    {%endif%}
                 </ul>
-            </nav>      
+            </nav>
+        </div>
+        <div class="side-nav-bar">                  <!--------------SIDE NAVIGATION BAR----------------->
+            <li><a href="gfm_grant_permission">Student Applications</a></li>
+            <li id="stu-ani-2"><a href="gfm_validate_stu">Validate <br> Student</a></li>
+            <li><a href="gfm_rejected_stu">Rejected Student List</a></li>
+            <li><a href="gfm_stu_report">Student<br>Report</a></li>
+            <li><a href="gfm_stu_profile">Student<br>Profile</a></li>
         </div>
     </header>
-    
-    <section id="stu">
-        <div class="container">
-            <div style="overflow-x: auto;">
-                    {%if data|length %}
-                    <section id="hd">
-                            <div class="container">
-                                    <h1>Student Verification</h1>
-                                </div>
-                    </section>
+    <section class="validate-gfm">
+    </section>
 
+
+
+<section id="tab">
+<div class="container">
+
+    {%if data|length %}
+    <br>
+    <br>
+
+            <div style="overflow-x: auto;">
             <table>
+
+               <!--  <tr>
+                    <td id="hd" colspan="7"><h1>Student Verification</h1></td>
+                </tr> -->
                 <tr>
                     <th>Sr.no</th>
                     <th>Name</th>
                     <th>Mobile Number</th>
-                    <th>Class</th>
+                    <th>Year</th>
                     <th>Roll no</th>
                     <th>GFM Name</th>
                     <th>Approve</th>
                 </tr>
-                {%for i in data%}
+            {%for i in data%}
                 <tr>
                     <td>{{i.0}}</td>
-                    <td>{{i.1}}</td>
-                    <td>{{i.2}}</td>
+                    <td>{{i.1}} {{i.2}}</td>
                     <td>{{i.3}}</td>
                     <td>{{i.4}}</td>
-                    <td>Prof. Bogiri</td>
+                    <td>{{i.5}}</td>
+                    <td>{{i.6}}</td>
+
                     <td>
                         <form action="" method="post">{% csrf_token %}
                         <label>
@@ -73,25 +95,47 @@
                             <input type="radio" name="verify" value="reject">
                             <span class="reject">REJECT</span>
                         </label>
-                    <button type="submit" name="Submit" value="{{i.1}}">Confirm</button>
+                    <button type="submit" name="Submit" value="{{i.7}}">Confirm</button>
                     </form></td>
                 </tr>
-                {%endfor%}
+            {%endfor%}
             </table>
-            {% else %}
-            <table>
-                    <tr> 
-                     <td id="hd" colspan="5" bgcolor="lightblue"><h1>No Student Request Pending</h1></td>
-                   </tr> 
-                   </table>
-                    
-              {%endif%}    
 
+        {% else %}
+        <section id="Warning">
+            <div class="container">
+        <div class="alert-warning">     <!---Alert Message--->
+                    <strong>Warning!</strong> No records found.
+                </div>
+            </div>
+        </section>
+        {%endif%} 
         </div>
         </div>
-    </section>
-<!--<footer>
-<p>KJCOEMR GATE PASS,Copyright &copy;2019</p>
-</footer>-->
+
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!----------------------------------------------------------- JAVASCRIPT ------------------------------>
+<script>                                            
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+}
+
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+}
+</script>
 </body>
 </html>

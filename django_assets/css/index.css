@@ -81,7 +81,7 @@ header a:hover{
 /*DISPLAY*/
 #showcase{
 	min-height: 400px;
-	background:linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),url("../show.jpg")no-repeat;
+	background:linear-gradient(rgba(0,0,0,0.4),rgba(168, 128, 128, 0.4)),url("../show.jpg")no-repeat;
 	text-align: center;
 	color: white;
 	background-size: cover;

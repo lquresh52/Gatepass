@@ -45,20 +45,24 @@
 					{%endfor%}
 					{%endblock%}
 			</div>
-	<div class="container">
+	<!-- <div class="container">
+		<div class="srch">
+			<input type="search" id="searchBox" placeholder="Search Your Name">
+		</div>
 		<select required="" id="w" name="gfm">
-			 <option value="Prof. V.B Maral">Prof. V.B Maral</option >
- 			 <option value="Prof.N.Bogiri">Prof.N.Bogiri</option>
-  			<option value="Prof. S.L.Yedage">Prof. S.L.Yedage</option>
-  			<option value="Prof.M Kharche">Prof.M Kharche</option>
+			<option value="Prof.S.Shinde">Prof. S.Shinde</option>
+			<option value="Prof.V.B Maral">Prof. V.B Maral</option >
+			 <option value="Prof.N.Bogiri">Prof.N.Bogiri</option>
+			 <option value="Prof.S.L.Yedage">Prof. S.L.Yedage</option>
+			 <option value="Prof.M.Kharche">Prof.M Kharche</option>
 		</select>
-	</div>
+	</div> -->
 	<div class="container">
-            <i class="fa fa-user"></i>
+            <!-- <i class="fa fa-user"></i> -->
             <input type="text" placeholder="First Name" name="first_name" value="" required="">
         </div>
         <div class="container">
-            <i class="fa fa-user"></i>
+            <!-- <i class="fa fa-user"></i> -->
             <input type="text" placeholder="Last Name" name="last_name" value="" required="">
         </div>
 	<div class="container">
@@ -79,7 +83,7 @@
 </section>
 <section id="btn">
 	<div class="container">
-<input class="bt" type="submit" name="" value="Log in">
+<input class="bt" type="submit" name="" value="Sign Up">
 	</div>
 	</form>
 </section>
@@ -89,6 +93,33 @@
         <p>Already Registered? <a href="gfm_login">Log in</a></p>
     </div>
 </section>
+
+
+<script>
+    searchBox = document.querySelector("#searchBox");
+countries = document.querySelector("#w");
+var when = "keyup"; //You can change this to keydown, keypress or change
+
+searchBox.addEventListener("keyup", function (e) {
+    var text = e.target.value; 
+    var options = countries.options; 
+    for (var i = 0; i < options.length; i++) {
+        var option = options[i]; 
+        var optionText = option.text; 
+        var lowerOptionText = optionText.toLowerCase();
+        var lowerText = text.toLowerCase(); 
+        var regex = new RegExp("^" + text, "i");
+        var match = optionText.match(regex); 
+        var contains = lowerOptionText.indexOf(lowerText) != -1;
+        if (match || contains) {
+            option.selected = true;
+            return;
+        }
+        searchBox.selectedIndex = 0;
+    }
+});
+</script>
+
 
 
 <!--<footer>

@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'gatepass.urls'
@@ -115,6 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
+# TIME_ZONE = 'IST'
 
 USE_I18N = True
 
@@ -144,7 +146,8 @@ STATIC_ROOT= os.path.join(BASE_DIR,'django_assets')
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'kjcoemr522@gmail.com'
-EMAIL_HOST_PASSWORD = 'kjcollege522'
+# EMAIL_HOST_PASSWORD = 'kjcollege522'
+EMAIL_HOST_PASSWORD = 'fadphcjrvllgigwr'
 EMAIL_PORT = 587
 
 

@@ -2,64 +2,78 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="shortcut icon" type="image/jpg" href="{% static 'icons/gp2.png' %}">
-	<!--<meta name="display" content="KJCOEMR GATE PASS"> -->
 
-	<title>Security Login Form</title>
-	<link rel="stylesheet" type="text/css" href="{% static 'css/institute.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/sec_log.css' %}">
+	<title>Security Login</title>
+	<link href="https://fonts.googleapis.com/css?family=Poppins&display=swap" rel="stylesheet">
 </head>
 <body>
 	<header>
-		<div class="container">
-			<div id="branding">
-			<a href="index"><h1>KJCOEMR GATE PASS</h1></a>
-			</div>
+		<div id="mySidenav" class="sidenav">
+	  		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+	  		<a href="index">Home</a>
+	 		<a href="about_us" >About</a>
+	  		<a href="#" >Contact</a>
+		</div>
+		<div class="top-nav-bar">					<!--------------TOP NAVIGATION BAR----------------->
+			<span class="top-nav-bar-burger"  onclick="openNav()">&#9776;</span>
+			<h1>KJCOEMR GATE PASS</h1>
 			<nav>
-				<ul>
-					<li><a href="index">HOME</a></li>
-					<li><a href="about_us">ABOUT</a></li>
+				<ul class="top-nav-bar-ul">
+					<li><a href="index">Home</a></li>
+					<li><a href="about_us" >About</a></li>
 					<li><a href="#">CONTACT</a></li>
 				</ul>
-			</nav>		
+			</nav>
 		</div>
 	</header>
-	
-<section id="log">
-	<div class="container">
-		<h1>Security Login</h1>
-	</div>
-	
-</section>
-<section id="textbox">
+	<section id="log">
+		<div class="container">
+			<h1>Security Login</h1>
+		</div>
+	</section>
 
-	<form action="" method="POST">{%csrf_token%}
-			<div>
-					{%block content%}
-					{%for  message in messages %}
-					<h2 style="color:red;">{{message}}</h2>
-					{%endfor%}
-					{%endblock%}
+	<div>
+		{%block content%}
+		{%for  message in messages %}
+		<div class="alert-warning">  
+			<h2>{{message}}</h2>
+			<!--  <strong>Wrong username or password!</strong> --> 
+  		</div>
+		
+		{%endfor%}
+		{%endblock%}
+</div>
+
+
+	
+	<section id="textbox">
+		<form action="" method="POST">{%csrf_token%}
+			<div class="container">
+				<i class="fa fa-user"></i>
+				<input type="text" placeholder="Username" name="username" value="" required="">
 			</div>
-	<div class="container">
-		<i class="fa fa-user"></i>
-		<input type="text" placeholder="Username" name="username" value="" required="">
-	</div>
-	<div class="container">
-		<i class="fa fa-lock"></i>
-		<input type="password" placeholder="Password" name="password" value="" required="">
-	</div>
-</section>
-<section id="btn">
-	<div class="container">
-<input class="bt" type="submit" name="" value="Log in">
-	</div>
-	</form>
-</section>
+			<div class="container">
+				<i class="fa fa-lock"></i>
+				<input type="password" placeholder="Password" name="password" value="" required="">
+			</div>
+	</section>
+	<section id="btn">
+		<div class="container">
+			<input class="bt" type="submit" name="" value="Log in">
+		</div>
+		</form>
+	</section>
+		<!----------------------------------------------------------- JAVASCRIPT ------------------------------>
+	<script>											
+		function openNav() {
+  		document.getElementById("mySidenav").style.width = "250px";
+		}
 
-<!-- <footer>
-<p>KJCOEMR GATE PASS,Copyright &copy;2019</p>
-</footer> -->
+		function closeNav() {
+  		document.getElementById("mySidenav").style.width = "0";
+		}
+	</script>
 </body>
-</html>

@@ -10,7 +10,8 @@ urlpatterns = [
     path('hod_accept',views.hod_accept,name='hod_accept'),
     path('hod_home',views.hod_home,name='hod_home'),
     path('hod_validate_gfm',views.hod_validate_gfm,name='hod_validate_gfm'),
-    path('stu_report',views.stu_report,name='stu_report'),
+    path('hod_stu_report',views.hod_stu_report,name='hod_stu_report'),
     path('forget_pass1',views.forget_pass1h,name='forget_pass1h'),
-    path('forget_pass2',views.forget_pass2h,name='forget_pass2h')
+    path('forget_pass2',views.forget_pass2h,name='forget_pass2h'),
+    path('hod_rejected_stu_application',views.hod_rejected_stu_application,name='hod_rejected_stu_application')
 ]

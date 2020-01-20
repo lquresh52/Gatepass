@@ -8,6 +8,7 @@ import psycopg2
 import datetime
 from datetime import date
 import os
+from django.core.mail import send_mail
 numalpha='abcdefghijklmnopqrstuvwxyz0123456789'
 key=5
 
@@ -57,7 +58,7 @@ def hod_login(request):
                         print(user)
                         if user is not None:
                             auth.login(request, user)
-                            return redirect("hod_home")
+                            return redirect("hod_accept")
                         else:
                             return redirect("hod_login")
                     else:         
@@ -93,7 +94,9 @@ def hod_accept(request):
         cur=con.cursor()
         gen=request.POST.get('verify')
         per=request.POST.get('Submit')
+        username=request.user.username
         print("HEllo")
+        per , req_type = per.split(':',1)
         print(per)
         print(gen)
         
@@ -104,11 +107,13 @@ def hod_accept(request):
         # ,req_accept_time='"+date+"'
         if per is not None:
             if gen == 'accept':
-                cur.execute("update student_in_req set status='accepted',req_accept_time='"+date+"' where username='"+per+"' and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
+                print("test")
+                cur.execute("update student_in_req set status='accepted',req_accept_time='"+date+"',req_acceped_by='"+username+"' where username='"+per+"' and request_type='"+req_type+"' and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
                 # cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")  
                 con.commit()
+                print("commited accept")
             else:
-                cur.execute("update student_in_req set status='rejected',req_accept_time='"+date+"' where username='"+per+"'and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
+                cur.execute("update student_in_req set status='hod_rejected',req_accept_time='"+date+"',req_acceped_by='"+username+"' where username='"+per+"' and request_type='"+req_type+"' and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
                 # cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")
                 con.commit()
         con.close()
@@ -121,11 +126,13 @@ def hod_accept(request):
             database="gatepass",
             user="postgres",
             password="123456")
-        print('In hod home')
+        print('In hod home'+str(datetime.date.today()))
         # username=request.user.username
         # print(username)
+
+        today_date = str(datetime.date.today())
         cur=con.cursor()
-        cur.execute("select username,gmail,reason,mobile_no,reason_des,apply_time from student_in_req where status='Pending'")
+        cur.execute(f"select username,gmail,request_type,mobile_no,reason_des,apply_time,first_name,last_name from student_in_req where (status='Pending' or status='gfm_accepted') and req_date='{today_date}'")
         rows=cur.fetchall()
     
         print(rows)
@@ -138,6 +145,69 @@ def hod_accept(request):
 
 
 
+#************************************************************************************************************************************
+
+@login_required(login_url='../hod/hod_login')
+def hod_rejected_stu_application(request):
+    if request.method=='POST':
+        con=psycopg2.connect(
+            host="localhost",
+            database="gatepass",
+            user="postgres",
+            password="123456")
+
+        cur=con.cursor()
+        gen=request.POST.get('verify')
+        per=request.POST.get('Submit')
+        username=request.user.username
+        per , req_type = per.split(':',1)
+        print("HEllo")
+        print(per)
+        print(gen)
+        
+        date=str(datetime.datetime.now())
+        today_date = str(datetime.date.today())
+        print(date)
+        print(today_date)
+        # ,req_accept_time='"+date+"'
+        if per is not None:
+            if gen == 'accept':
+                print("test")
+                cur.execute("update student_in_req set status='accepted',req_accept_time='"+date+"',req_acceped_by='"+username+"' where username='"+per+"'and request_type='"+req_type+"' and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
+                # cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")  
+                con.commit()
+                print("commited accept")
+            else:
+                cur.execute("update student_in_req set status='hod_rejected',req_accept_time='"+date+"',req_acceped_by='"+username+"' where username='"+per+"'and request_type='"+req_type+"' and req_date='"+today_date+"' and status!='IN' and status!='OUT'")
+                # cur.execute("update student_in_req set req_accept_time='"+date+"' where username='"+per+"'")
+                con.commit()
+        con.close()
+        return redirect('hod_rejected_stu_application')
+    else:
+        print('Retriving records/data')
+        con=psycopg2.connect(
+            host="localhost",
+            database="gatepass",
+            user="postgres",
+            password="123456")
+        print('In hod home'+str(datetime.date.today()))
+        # username=request.user.username
+        # print(username)
+
+        today_date = str(datetime.date.today())
+        cur=con.cursor()
+        cur.execute(f"select username,gmail,request_type,mobile_no,reason_des,apply_time,first_name,last_name from student_in_req where status='gfm_rejected' and req_date='{today_date}'")
+        rows=cur.fetchall()
+    
+        print(rows)
+        
+        for i in range(0, len(rows)):
+            print("///////////")
+            rows[i] = rows[i] + (stu_signup.objects.get(username=rows[i][0]).user_img, ) 
+          
+        return render(request,'hod_rejected_stu_application.html',{'data':rows})
+
+
 
 
 #************************************************************************************************************************************
@@ -146,7 +216,7 @@ def hod_validate_gfm(request):
     if request.method=='POST':
 
         con=psycopg2.connect(
-            host="localhost",
+        host="localhost",
             database="gatepass",
             user="postgres",
             password="123456")
@@ -160,10 +230,10 @@ def hod_validate_gfm(request):
 
         if per is not None:
             if gen == 'accept':
-                cur.execute("update gfm_gfm_signup set valid='accepted' where gfm='"+per+"'")
+                cur.execute("update gfm_gfm_signup set valid='accepted' where email='"+per+"'")
                 con.commit()
             else:
-                cur.execute("update gfm_gfm_signup set valid='rejected' where gfm='"+per+"'")
+                cur.execute("update gfm_gfm_signup set valid='rejected' where email='"+per+"'")
                 con.commit()
         con.close()
         return redirect('hod_validate_gfm')
@@ -175,7 +245,7 @@ def hod_validate_gfm(request):
             password="123456")
 
         cur=con.cursor()
-        cur.execute("select gfm,mobile_no,email,icard_no from gfm_gfm_signup where valid='Pending'")
+        cur.execute("select first_name,mobile_no,email,icard_no,last_name from gfm_gfm_signup where valid='Pending'")
         rows=cur.fetchall()
 
         # for generating  id number e.g 1,2,3,4 depend on rows
@@ -193,7 +263,7 @@ def hod_validate_gfm(request):
 
 #************************************************************************************************************************************
 
-def stu_report(request):
+def hod_stu_report(request):
     if request.method=='POST':    
         date_from=request.POST.get('date_from')
         date_to=request.POST.get('date_to')
@@ -202,7 +272,7 @@ def stu_report(request):
 
         if date_from=='' and date_to =='':
             messages.info(request,'Plz enter the dates')
-            return render(request,'stu_report.html')
+            return render(request,'hod_stu_report.html')
 
         con=psycopg2.connect(
             host="localhost",
@@ -211,7 +281,7 @@ def stu_report(request):
             password="123456")
 
         cur=con.cursor()
-        cur.execute("select username,mobile_no,gmail,reason,reason_des,req_date,status from student_in_req where req_date >= '"+ date_from+"' and req_date <= '"+date_to+"' and (status='IN' or status='OUT')")
+        cur.execute("select username,mobile_no,gmail,reason,reason_des,req_date,status,first_name,last_name from student_in_req where req_date >= '"+ date_from+"' and req_date <= '"+date_to+"' and (status='IN' or status='OUT')")
         rows=cur.fetchall()
         print(rows)
 
@@ -222,9 +292,9 @@ def stu_report(request):
         if rows is not None:
             print(rows) 
             con.close()
-            return render(request,'stu_report.html',{'data':new_row})
+            return render(request,'hod_stu_report.html',{'data':new_row})
         else:
-            return render(request,'stu_report.html')
+            return render(request,'hod_stu_report.html')
     else:
         con=psycopg2.connect(
             host="localhost",
@@ -233,7 +303,7 @@ def stu_report(request):
             password="123456")
 
         cur=con.cursor()
-        cur.execute("select username,mobile_no,gmail,reason,reason_des,req_date,status from student_in_req where status='accepted' or status='IN' or status='OUT'")
+        cur.execute("select username,mobile_no,gmail,reason_des,req_acceped_by,req_date,status,first_name,last_name from student_in_req where status='accepted' or status='IN' or status='OUT'")
         rows=cur.fetchall()
 
         new_row = list(rows)
@@ -243,10 +313,10 @@ def stu_report(request):
         if rows is not None:
             print(rows) 
             con.close()
-            return render(request,'stu_report.html',{'data':new_row})
+            return render(request,'hod_stu_report.html',{'data':new_row})
         else:
             # return redirect('apply')
-            return render(request,'stu_report.html')
+            return render(request,'hod_stu_report.html')
 
 #************************************************************************************************************************************
 

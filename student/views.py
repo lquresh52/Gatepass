@@ -1,21 +1,25 @@
 from django.shortcuts import render,redirect
 from django.contrib import messages
+from django.http import HttpResponse
 from django.contrib.auth.models import User,auth
 from django.contrib.auth import authenticate
 from django.contrib.auth.decorators import login_required
-from student.models import stu_signup,in_req
+from student.models import stu_signup,in_req,email_verifiction
 import psycopg2
+import math, random
 import datetime
 from datetime import date
 import os
 from django.conf import settings
 from django.core.mail import send_mail
 
+
 numalpha='abcdefghijklmnopqrstuvwxyz0123456789'
 key=5
 
 
 # Create your views here.
+
 
 #************************************************************************************************************************************
 def index(request):
@@ -40,7 +44,7 @@ def student_login(request):
     if request.method == 'POST':
         username=request.POST.get("username")
         password=request.POST.get("password")
-
+    
         con=psycopg2.connect(
             host="localhost",
             database="gatepass",
@@ -48,7 +52,10 @@ def student_login(request):
             password="123456")
 
         cur=con.cursor()
-        cur.execute("select valid from student_stu_signup where username='"+ username +"'")
+        
+
+# verify account is valid or not
+        cur.execute(f"select valid from student_stu_signup where username='{username}'")
         valid=cur.fetchall()
         print(valid)
 
@@ -104,6 +111,57 @@ def student_login(request):
         return render(request,'stu_login.html')
 
 
+
+#************************************************************************************************************************************
+
+
+def email_verify(request):
+    if request.method=='POST':
+        otp=request.POST.get("otp")
+        email = request.session["email1"]
+        data = request.session["data"]
+        print(email)
+        con=psycopg2.connect(
+            host="localhost",
+            database="gatepass",
+            user="postgres",
+            password="123456")
+
+        cur=con.cursor()
+        cur.execute(f"select otp from student_email_verifiction where email='{email}'")
+        rows = cur.fetchall()
+
+        for r in rows:
+            if r[0]==otp:
+                cur.execute(f"update student_stu_signup set email_verify='accepted' where email='{email}'")
+                con.commit()
+                user= stu_signup(username=data['username'],first_name=data['first_name'],last_name=data['last_name'],gender=data['gender'],password=data['encrypt'],email=data['email'],mobile_no=int(data['mobile_no']),year=data['year'],branch=data['branch'],roll_no=int(data['roll_no']),gfm=data['gfm'],icard_img=data['p'],user_img=data['p1'],valid='Pending',email_verify='accepted')
+                user.save()
+                # Authentication mate django user create kido
+                user= User.objects.create_user(username=data['username'],password=data['password1'],email=data['email'],first_name=data['first_name'],last_name=data['last_name'])
+                user.save()
+                del request.session['email1']
+                return redirect('student_login')      
+            else:
+                messages.info(request,'OTP did not match !!!!!!')
+                return redirect('email_verify')
+        
+        return render(request,'email_verify.html')
+    else:
+        email = request.session["email1"]
+        print(email)
+        data = request.session.get("data",None)
+        # print(data)
+        print(data['username'])
+        return render(request,'email_verify.html')
+
+
+
+
+
+
+
+
 #************************************************************************************************************************************
 
 
@@ -121,17 +179,12 @@ def signup_form(request):
         branch=request.POST.get('branch')
         roll_no=request.POST.get('roll_no')
         gfm=request.POST.get('gfm')
-        # icard_img=request.POST.get('icard_img')
-        # p=request.POST.get('icard_img')
-        p=request.FILES['icard_img']
+        
+        
+        icard_img = request.POST.get("b64-value1")
+        print("-----------------Testing p tag-----------------")
+        user_img=request.POST.get('b64-value2')
 
-        # user_img=request.POST.get('user_img')
-        p1=request.FILES['user_img']
-
-        print(type(p))
-
-        print(p1)
-        print(p)
         con=psycopg2.connect(
             host="localhost",
             database="gatepass",
@@ -160,27 +213,80 @@ def signup_form(request):
 	            pos=numalpha.find(i)
 	            newpos=(pos+key)%36
 	            encrypt=encrypt+numalpha[newpos]
-            user= stu_signup(username=username,first_name=first_name,last_name=last_name,gender=gender,password=encrypt,email=email,mobile_no=mobile_no,year=year,branch=branch,roll_no=roll_no,gfm=gfm,icard_img=p,user_img=p1,valid='Pending')
-            user.save()
-            # Authentication mate django user create kido
-            user= User.objects.create_user(username=username,password=password1,email=email,first_name=first_name,last_name=last_name)
-            user.save()
+            
             print('registered')
-            return redirect("student_login")
-        
+            #  Email verify using otp
+            con=psycopg2.connect(
+            host="localhost",
+            database="gatepass",
+            user="postgres",
+            password="123456")
+
+            cur=con.cursor()
+            request.session["email1"] = email
+            string = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            OTP = ""
+            length = len(string) 
+            for i in range(6) : 
+                OTP = OTP + string[math.floor(random.random() * length)]
+            print(OTP)
+            user= email_verifiction(email=email,otp=OTP)
+            user.save()
+            # cur.execute(f"update student_stu_signup set email_otp='{OTP}' where email='{email}'")
+            # con.commit()
+
+            subject = 'Verify your gmail account.'
+            message = '\n Your OTP is : '+OTP+' .'
+            from_email = settings.EMAIL_HOST_USER
+            to_list = [email,'lquresh52@gmail.com']
+            send_mail(subject , message , from_email , to_list , fail_silently=True)
+
+            data = {'username':username,'first_name':first_name,'last_name':last_name,'gender':gender,'encrypt':encrypt,'password1':password1,'email':f'{email}','mobile_no':f'{mobile_no}','year':year,'branch':branch,'roll_no':f'{roll_no}','gfm':gfm,'p':f'{icard_img}','p1':f'{user_img}'}
+            request.session['data'] = data            
+            return redirect('email_verify')
+
         return redirect('student_login')
     else:
-        return render(request,'stu_signup.html')
+        con=psycopg2.connect(
+            host="localhost",
+            database="gatepass",
+            user="postgres",
+            password="123456")
+
+        cur=con.cursor()
+        cur.execute("select first_name,last_name,email from gfm_gfm_signup where valid='accepted'")
+        rows = cur.fetchall()
+
+        print(rows)
+        data = []
+        
+        # for row in rows:
+        #     # print(row[0],row[1])
+        #     a =  f'{row[0]} '+row[1]
+        #     print(a)
+        #     data.append(a)
+
+        # print(data)
+
+        return render(request,'stu_signup.html',{'data':rows})
 
 
 
 #************************************************************************************************************************************
 
 
+
+
+
 def forget_pass11(request):
     if request.method == 'POST':
+       
         email=request.POST.get("email")
         mobile_no=request.POST.get("mobile_no")
+
+        # first_name = request.user.first_name
+        # last_name = request.user.last_name
+        request.session["email"] = email
         print(email,mobile_no)
         con=psycopg2.connect(
             host="localhost",
@@ -191,14 +297,29 @@ def forget_pass11(request):
         cur=con.cursor()
         cur.execute("select email,mobile_no,valid from student_stu_signup where email='" + email + "' and mobile_no="+mobile_no+"")
         rows=cur.fetchall()
-        con.close()
         print(rows)
         if not rows ==[]:
             for r in rows:
                 if not r[2]=='rejected':
                     print(r[1])
                     if email == r[0] and int(mobile_no)==r[1]:
-                        return redirect('forget_pass22')
+                        
+                        string = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+                        OTP = ""
+                        length = len(string) 
+                        for i in range(6) : 
+                            OTP = OTP + string[math.floor(random.random() * length)]
+                        print(OTP)
+                        cur.execute(f"update student_stu_signup set otp='{OTP}' where email='{email}'")
+                        con.commit()
+
+                        subject = 'Password Change OTP .'
+                        message = '\n Your OTP is : '+OTP+'.'
+                        from_email = settings.EMAIL_HOST_USER
+                        to_list = [email,'lquresh52@gmail.com']
+                        send_mail(subject , message , from_email , to_list , fail_silently=True)
+                        
+                        return redirect('otp')
                     else:
                         messages.info(request,'Email id and mobile number did not match!!!!!!!! ')
                         return render(request,'forget_pass1.html')
@@ -214,8 +335,42 @@ def forget_pass11(request):
 
 #************************************************************************************************************************************
 
+def otp(request):
+    if request.method=='POST':
+        otp=request.POST.get("otp")
+
+        email = request.session["email"]
+        
+        print(email)
+
+        con=psycopg2.connect(
+            host="localhost",
+            database="gatepass",
+            user="postgres",
+            password="123456")
+
+        cur=con.cursor()
+        cur.execute(f"select otp from student_stu_signup where email='{email}'")
+        rows = cur.fetchall()
+
+        for r in rows:
+            if r[0]==otp:
+                return redirect('forget_pass22')      
+            else:
+                messages.info(request,'OTP did not match !!!!!!')
+                return redirect('otp')
+
+        # return render(request,'otp.html')
+    else:
+        # email = request.session["email"]
+        # print(email)
+        return render(request,'otp.html')
 
 
+
+
+
+#************************************************************************************************************************************
 
 def forget_pass22(request):
     print('lol')
@@ -265,7 +420,36 @@ def forget_pass22(request):
 @login_required(login_url='../student/student_login')
 def stu_home(request):
     if request.method=='POST':
-        return redirect('stu_home')
+        date_from=request.POST.get('date_from')
+        date_to=request.POST.get('date_to')
+        print('///////////////')
+        print(date_from,date_to)
+        username=request.user.username
+        if date_from=='' and date_to =='':
+            messages.info(request,'Plz enter the dates')
+            return render(request,'stu_home.html')
+
+        con=psycopg2.connect(
+            host="localhost",
+            database="gatepass",
+            user="postgres",
+            password="123456")
+
+        cur=con.cursor()
+        cur.execute(f"select apply_time,reason_des,request_type,status,req_acceped_by from student_in_req where username='{username}' and req_date >= '"+ date_from+"' and req_date <= '"+date_to+"'")
+        rows=cur.fetchall()
+        print(rows)
+        new_row = list(rows)
+        
+        for i in range (0, len(rows)):
+            new_row[i] = (i+1,) + new_row[i]
+
+        if rows is not None:
+            print(new_row) 
+            con.close()
+            return render(request,'stu_home.html',{'data':new_row})
+        else:
+            return render(request,'stu_home.html')
     else:
         con=psycopg2.connect(
             host="localhost",
@@ -276,7 +460,7 @@ def stu_home(request):
         username=request.user.username
         print(username)
         cur=con.cursor()
-        cur.execute("select apply_time,username,reason_des,status from student_in_req where username='" + username + "'")
+        cur.execute("select apply_time,reason_des,request_type,status,req_acceped_by from student_in_req where username='" + username + "'")
         rows=cur.fetchall()
         
         # for generating  id number e.g 1,2,3,4 depend on rows
@@ -291,6 +475,48 @@ def stu_home(request):
 #************************************************************************************************************************************
 
 
+@login_required(login_url='../student/student_login')
+def my_profile(request):
+    if request.method=='POST':
+        return render(request,'my_profile.html')
+    else:
+        username=request.user.username
+        con=psycopg2.connect(
+            host="localhost",
+            database="gatepass",
+            user="postgres",
+            password="123456")
+        
+        cur=con.cursor()
+        
+        cur.execute(f"select first_name,last_name,year,branch,roll_no,email,mobile_no,gfm from student_stu_signup where username='{username}'")
+        rows = cur.fetchall()
+        print(rows)
+        a=''
+        for r in rows:
+            a = r[7]
+        print(a)
+        cur.execute(f"select first_name,last_name from gfm_gfm_signup where email='{a}'")
+        gfm = cur.fetchall()
+        print(gfm)
+
+        cur.execute(f"select icard_img,user_img from student_stu_signup where username='{username}'")
+        image = cur.fetchall()
+
+
+        for g in gfm:
+            gfm = f'{g[0]} '+g[1]
+        print(gfm)
+
+        return render(request,'my_profile.html',{'data':rows,'gfm':gfm,'img':image})
+
+
+#************************************************************************************************************************************
+
+
+
+
+
 def logout(request):
     auth.logout(request)
     return redirect('student_login')
@@ -303,76 +529,66 @@ def logout(request):
 @login_required(login_url='../student/student_login')
 def in_apply(request):
     if request.method=='POST':
-        reason=request.POST.get('radio')
+        # reason=request.POST.get('radio')
         reason_des=request.POST.get('reason_des')
         # request_type=request.POST.get('Submit')
-        print(reason,reason_des)
+        print(reason_des)
         now = datetime.datetime.now()
         username=request.user.username
         first_name = request.user.first_name
         last_name = request.user.last_name
-        today = date.today()
-        
+        today = str(date.today())
+        print(today)
         con=psycopg2.connect(
             host="localhost",
             database="gatepass",
             user="postgres",
             password="123456")
+
+
         cur=con.cursor()
-        cur.execute("select mobile_no,email from student_stu_signup where username='" + username + "'")
+        cur.execute("select mobile_no,email,year,branch,first_name,last_name from student_stu_signup where username='" + username + "'")
         rows=cur.fetchall()
+        print(rows)
         email=''
         mobile_no=''
+        year=''
+        branch=''
+        first_name=''
+        last_name=''
         if not rows==[]:
             for r in rows:
                 email=r[1]
                 mobile_no=int(r[0])
+                year=r[2]
+                branch=r[3]
+                first_name=r[4]
+                last_name=r[5]
 
 
-        cur.execute("select apply_time,in_req_count,req_date from student_in_req where username='" + username + "'")
+        cur.execute("select count(req_date) from student_in_req where username='" + username + "' and req_date='"+today+"' and request_type='IN Request'")
         row=cur.fetchall()
+        print(row)
         count=0
-        req_date=''
         if not row==[]:
             for r in row:
-                count=int(r[1])
-                req_date=r[2]
+                count=int(r[0])
+        print("Request count for todats date is : " + str(count))
         
-        if today == req_date:
-            print('//////////////////')
-            if not count==1:
-                #send_mail(subject,message,from_email,to_list,fail_silently=True)
-                subject = 'There is a IN request by student : '+first_name+last_name+'.'
-                message = 'REASON : '+reason+'\n REASON DESCRIPTION : '+reason_des
-                from_email = settings.EMAIL_HOST_USER
-                to_list = ['lquresh52@gmail.com']
-
-                send_mail(subject , message , from_email , to_list , fail_silently=True)
-
-                user=in_req(apply_time=datetime.datetime.now(), reason=reason, reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='IN Request' , in_req_count=count+1 , req_date=today )
-                user.save()
-                print('data saved in table')
-
-
-
-            else:
-                messages.info(request,'Your daily limit for apply of gate pass is over contact your respective HOD sir')
-                return redirect('in_apply')
-        else:
-            print('888888888888888')
-            print(email,mobile_no)
+        if count==0:
             subject = 'There is a IN request by student : '+first_name+last_name+'.'
-            message = 'REASON : '+reason+'\n REASON DESCRIPTION : '+reason_des
+            message = '\n REASON DESCRIPTION : '+reason_des
             from_email = settings.EMAIL_HOST_USER
             to_list = ['lquresh52@gmail.com']
 
             send_mail(subject , message , from_email , to_list , fail_silently=True)
-            user=in_req(apply_time=str(datetime.datetime.now()), reason=reason, reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='IN Request' , in_req_count=count+1 , req_date=today )
+
+            user=in_req(apply_time=datetime.datetime.now(), reason="_", reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='IN Request' , in_req_count=count+1 , req_date=today,branch=branch,year=year,first_name=first_name,last_name=last_name )
             user.save()
             print('data saved in table')
-
-            # return render(request,'stu_home.html')
-            return redirect('stu_home')
+        else:
+            messages.info(request,'Your daily limit for apply of gate pass is over contact your respective HOD sir')
+            return redirect('in_apply')
         return redirect('stu_home')
     else:
         return render(request,'in_apply.html')
@@ -385,76 +601,75 @@ def in_apply(request):
 @login_required
 def out_apply(request):
     if request.method=='POST':
-        reason=request.POST.get('radio')
+        # reason=request.POST.get('radio')
         reason_des=request.POST.get('reason_des')
         # request_type=request.POST.get('Submit')
-        print(reason,reason_des)
+        print(reason_des)
         now = datetime.datetime.now()
         username=request.user.username
         first_name = request.user.first_name
         last_name = request.user.last_name
-        today = date.today()
+        today = str(date.today())
         
         con=psycopg2.connect(
             host="localhost",
             database="gatepass",
             user="postgres",
             password="123456")
+
+
         cur=con.cursor()
-        cur.execute("select mobile_no,email from student_stu_signup where username='" + username + "'")
+        cur.execute("select mobile_no,email,year,branch,first_name,last_name from student_stu_signup where username='" + username + "'")
         rows=cur.fetchall()
         email=''
         mobile_no=''
         print(rows)
+        year=''
+        branch=''
+        first_name=''
+        last_name=''
+
         if not rows==[]:
             for r in rows:
                 email=r[1]
                 mobile_no=int(r[0])
+                year=r[2]
+                branch=r[3]
+                first_name=r[4]
+                last_name=r[5]
 
 
-        cur.execute("select apply_time,out_req_count,req_date from student_in_req where username='" + username + "'")
+
+        cur.execute("select count(req_date) from student_in_req where username='" + username + "' and req_date='"+today+"' and request_type='Out Request'")
         row=cur.fetchall()
+        print(row)
         count=0
-        req_date=''
         if not row==[]:
             for r in row:
-                count=int(r[1])
-                req_date=r[2]
-        print(req_date)
-        if today==req_date:
-            print('//////////////////')
-            if not count==1:
-                subject = 'There is a OUT Request by student : '+first_name+last_name+'.'
-                message = 'REASON : '+reason+'\n REASON DESCRIPTION : '+reason_des
-                from_email = settings.EMAIL_HOST_USER
-                to_list = ['lquresh52@gmail.com']
+                count=int(r[0])
+        print("Request count for todats date is : " + str(count))
 
-                send_mail(subject , message , from_email , to_list , fail_silently=True)
-                user=in_req(apply_time=datetime.datetime.now(), reason=reason, reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='Out Request' , out_req_count=count+1 , req_date=today )
-                user.save()
-
-
-            else:
-                messages.info(request,'Your daily limit for apply of gate pass is over contact your respective HOD sir')
-                return redirect('out_apply')
-        else:
-            print('888888888888888')
-            print(email,mobile_no)
+        if count==0:
             subject = 'There is a OUT Request by student : '+first_name+last_name+'.'
-            message = 'REASON : '+reason+'\n REASON DESCRIPTION : '+reason_des
+            message = '\n REASON DESCRIPTION : '+reason_des
             from_email = settings.EMAIL_HOST_USER
             to_list = ['lquresh52@gmail.com']
 
             send_mail(subject , message , from_email , to_list , fail_silently=True)
-            user=in_req(apply_time=str(datetime.datetime.now()), reason=reason, reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='Out Request' , out_req_count=count+1 , req_date=today )
+            user=in_req(apply_time=datetime.datetime.now(), reason='_', reason_des=reason_des, username=username, gmail=email, mobile_no=mobile_no, status='Pending',request_type='Out Request' , out_req_count=count+1 , req_date=today ,branch=branch,year=year,first_name=first_name,last_name=last_name)
             user.save()
-            # return render(request,'stu_home.html')
-            return redirect('stu_home')
 
+
+        else:
+            messages.info(request,'Your daily limit for apply of gate pass is over contact your respective HOD sir')
+            return redirect('out_apply')
         return redirect('stu_home')
-    
     else:
         return render(request,'out_apply.html')
+
+
+    
+    
     
     
     
